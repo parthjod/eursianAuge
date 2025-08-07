@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?
+  googleId      String?   @unique
+  avatar        String?
+  subscription  Subscription?
+  feedbacks     Feedback[]
+  socialAccounts SocialAccount[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  plan        String   // "first-tier", "second-tier", "third-tier"
+  status      String   @default("active") // "active", "cancelled", "expired"
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  rating    Int?     // 1-5 rating
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialAccount {
+  id          String   @id @default(cuid())
+  userId      String
+  platform    String   // "instagram", "twitter", "facebook"
+  accountId   String
+  username    String?
+  accessToken String?
+  isActive    Boolean  @default(true)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Threat {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String   // "phishing", "malware", "suspicious_activity", etc.
+  severity    String   // "low", "medium", "high", "critical"
+  description String
+  source      String?  // URL, account, etc.
+  status      String   @default("detected") // "detected", "blocked", "resolved"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SecurityMetric {
+  id          String   @id @default(cuid())
+  userId      String
+  metricType  String   // "threats_blocked", "accounts_protected", "security_score", "active_alerts"
+  value       Int
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}

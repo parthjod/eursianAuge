@@ -1,0 +1,46 @@
+# === Frontend (Vite + JavaScript) ===
+node_modules/
+dist/
+.vite/
+.env
+
+# Optional: lock files (comment/uncomment as needed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === Backend (Python + Flask) ===
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.venv/
+venv/
+instance/          # Flask instance folder (optional, for configs)
+*.db               # SQLite database files
+*.log
+
+# Flask-specific
+flask_session/     # If using server-side sessions with filesystem
+.mypy_cache/
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# === IDE / OS Files ===
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+*.sublime-project
+*.sublime-workspace
