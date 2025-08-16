@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '../../../../lib/db'
+import { prisma, dbUtils } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email }
     })
 
@@ -33,6 +34,19 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid credentials' },
         { status: 401 }
       )
+    }
+
+    // Log analytics event
+    try {
+      await dbUtils.logAnalytics({
+        userId: user.id,
+        eventType: 'login',
+        eventData: JSON.stringify({ method: 'email' }),
+        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown'
+      })
+    } catch (analyticsError) {
+      console.error('Failed to log analytics:', analyticsError)
     }
 
     // Return user data (excluding password)

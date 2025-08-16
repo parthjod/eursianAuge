@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@/contexts/UserContext'
@@ -21,6 +22,7 @@ import {
   Users, 
   BarChart3, 
   Settings, 
+  CreditCard,
   LogOut,
   TrendingUp,
   ChevronDown
@@ -49,6 +51,12 @@ const menuItems = [
     title: "Analytics",
     url: "/dashboard/analytics",
     icon: BarChart3,
+    badge: null,
+  },
+  {
+    title: "Billing",
+    url: "/dashboard/billing",
+    icon: CreditCard,
     badge: null,
   },
   {

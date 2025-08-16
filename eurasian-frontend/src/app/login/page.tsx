@@ -3,19 +3,21 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
-import { Separator } from '../../components/ui/separator'
+import { signIn, getSession } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { Chrome } from 'lucide-react'
-import { useToast } from '../../hooks/use-toast'
-import { useUser } from '../../contexts/UserContext'
+import { useToast } from '@/hooks/use-toast'
+import { useUser } from '@/contexts/UserContext'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useUser()
@@ -54,13 +56,32 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = () => {
-    // This will be implemented with Google OAuth
-    console.log('Login with Google')
-    toast({
-      title: "Google OAuth",
-      description: "Google OAuth integration coming soon!",
-    })
+  const handleGoogleLogin = async () => {
+    setIsGoogleLoading(true)
+    try {
+      await signIn('google', { 
+        callbackUrl: '/dashboard',
+        redirect: false 
+      })
+      
+      // Check if sign in was successful
+      const session = await getSession()
+      if (session) {
+        toast({
+          title: "Login successful",
+          description: "Welcome back to Eurasian!",
+        })
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      toast({
+        title: "Google login failed",
+        description: "Please try again or use email login.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsGoogleLoading(false)
+    }
   }
 
   return (
@@ -85,10 +106,10 @@ export default function LoginPage() {
             variant="outline"
             className="w-full"
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
           >
             <Chrome className="mr-2 h-4 w-4" />
-            Continue with Google
+            {isGoogleLoading ? "Connecting..." : "Continue with Google"}
           </Button>
 
           <div className="relative">

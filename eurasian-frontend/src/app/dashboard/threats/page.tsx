@@ -12,7 +12,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useToast } from '@/hooks/use-toast'
@@ -22,14 +21,25 @@ import {
   Users, 
   BarChart3, 
   Settings, 
+  CreditCard,
   LogOut,
   AlertTriangle,
   CheckCircle,
-  TrendingUp,
-  User,
   RefreshCw,
   ChevronDown
 } from 'lucide-react'
+
+type Threat = {
+  id: string
+  type: string
+  severity: 'Critical' | 'High' | 'Medium' | 'Low'
+  status: 'Blocked' | 'Investigating' | 'Resolved'
+  description: string
+  source: string
+  target: string
+  detectedAt: string
+  actionTaken: string
+}
 
 const menuItems = [
   {
@@ -57,6 +67,12 @@ const menuItems = [
     badge: null,
   },
   {
+    title: "Billing",
+    url: "/dashboard/billing",
+    icon: CreditCard,
+    badge: null,
+  },
+  {
     title: "Settings",
     url: "/dashboard/settings",
     icon: Settings,
@@ -69,17 +85,6 @@ export default function ThreatsPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
-  type Threat = {
-    id: string
-    type: string
-    severity: 'Critical' | 'High' | 'Medium' | 'Low'
-    status: 'Blocked' | 'Investigating' | 'Resolved' | string
-    description: string
-    source: string
-    target: string
-    detectedAt: string
-    actionTaken: string
-  }
   const [threats, setThreats] = useState<Threat[]>([])
 
   // Fetch threats data
@@ -185,8 +190,8 @@ export default function ThreatsPage() {
           <div className="p-4 border-t border-slate-800">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.avatar || ''} alt={user?.name || ''} />
+                <AvatarFallback>{user?.name?.charAt(0) || ''}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{user?.name}</p>

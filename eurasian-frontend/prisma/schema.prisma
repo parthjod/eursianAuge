@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,29 +8,57 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  password      String?
-  googleId      String?   @unique
-  avatar        String?
-  subscription  Subscription?
-  feedbacks     Feedback[]
-  socialAccounts SocialAccount[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  password         String?
+  googleId         String?          @unique
+  avatar           String?
+  subscription     Subscription?
+  feedbacks        Feedback[]
+  socialAccounts   SocialAccount[]
+  threats          Threat[]
+  securityMetrics  SecurityMetric[]
+  analytics        Analytics[]
+  aiAgents         AIAgent[]
+  accounts         Account[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Account {
+  id                String @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model Subscription {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  plan        String   // "first-tier", "second-tier", "third-tier"
-  status      String   @default("active") // "active", "cancelled", "expired"
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  plan            String   // "first-tier", "second-tier", "third-tier"
+  status          String   @default("active") // "active", "cancelled", "expired"
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  price           Float
+  billingCycle    String   @default("monthly") // "monthly", "yearly"
+  lastPaymentDate DateTime?
+  nextPaymentDate DateTime?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Feedback {
@@ -44,41 +66,110 @@ model Feedback {
   userId    String
   message   String
   rating    Int?     // 1-5 rating
+  category  String?  // "general", "bug", "feature", "support"
+  status    String   @default("pending") // "pending", "reviewed", "resolved"
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model SocialAccount {
-  id          String   @id @default(cuid())
-  userId      String
-  platform    String   // "instagram", "twitter", "facebook"
-  accountId   String
-  username    String?
-  accessToken String?
-  isActive    Boolean  @default(true)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String        @id @default(cuid())
+  userId          String
+  platform        String        // "instagram", "twitter", "facebook", "linkedin", "tiktok"
+  accountId       String
+  username        String?
+  email           String?
+  avatar          String?
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
+  isActive        Boolean       @default(true)
+  isProtected     Boolean       @default(true)
+  followers       Int           @default(0)
+  following       Int           @default(0)
+  posts           Int           @default(0)
+  lastScanned     DateTime?
+  threatCount     Int           @default(0)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scans           SocialScan[]
+  threats         Threat[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([userId, platform, accountId])
+  @@unique([userId, platform], name: "userId_platform") // ✅ Added for upsert support
 }
 
+
 model Threat {
-  id          String   @id @default(cuid())
-  userId      String
-  type        String   // "phishing", "malware", "suspicious_activity", etc.
-  severity    String   // "low", "medium", "high", "critical"
-  description String
-  source      String?  // URL, account, etc.
-  status      String   @default("detected") // "detected", "blocked", "resolved"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String         @id @default(cuid())
+  userId          String
+  socialAccountId String?
+  type            String         // "phishing", "malware", etc.
+  severity        String         // "low", "medium", "high", "critical"
+  description     String
+  source          String?
+  status          String         @default("detected") // "detected", "investigating", etc.
+  actionTaken     String?
+  confidence      Float?
+  metadata        String?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  socialAccount   SocialAccount? @relation(fields: [socialAccountId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 model SecurityMetric {
   id          String   @id @default(cuid())
   userId      String
-  metricType  String   // "threats_blocked", "accounts_protected", "security_score", "active_alerts"
+  metricType  String
   value       Int
   date        DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
+
+  @@unique([userId, metricType, date])
+}
+
+model Analytics {
+  id         String   @id @default(cuid())
+  userId     String
+  eventType  String
+  eventData  String?
+  ipAddress  String?
+  userAgent  String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model SocialScan {
+  id              String        @id @default(cuid())
+  socialAccountId String
+  scanType        String        // "full", "quick", "targeted"
+  status          String        @default("pending")
+  threatsFound    Int           @default(0)
+  threatsBlocked  Int           @default(0)
+  duration        Int?
+  errorMessage    String?
+  metadata        String?
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model AIAgent {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  type          String
+  tier          String
+  status        String   @default("active")
+  configuration String?
+  lastRun       DateTime?
+  nextRun       DateTime?
+  performance   Float?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
-import { Separator } from '../../components/ui/separator'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { Chrome } from 'lucide-react'
-import { useToast } from '../../hooks/use-toast'
-import { useUser } from '../../contexts/UserContext'
+import { useToast } from '@/hooks/use-toast'
+import { useUser } from '@/contexts/UserContext'
 
 export default function SignupPage() {
   const [name, setName] = useState('')

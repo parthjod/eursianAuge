@@ -2,20 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '../../contexts/UserContext'
-import { ProtectedRoute } from '../../components/ProtectedRoute'
-import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
-import { Badge } from '../../components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar'
+import { useUser } from '@/contexts/UserContext'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../components/ui/dropdown-menu'
-import { useToast } from '../../hooks/use-toast'
+} from '@/components/ui/dropdown-menu'
+import { useToast } from '@/hooks/use-toast'
 import { 
   LayoutDashboard, 
   Shield, 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '../../../lib/db'
+import { prisma } from '../../../lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create feedback
-    const feedback = await db.feedback.create({
+    const feedback = await prisma.feedback.create({
       data: {
         rating,
         message,
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // This endpoint could be used by admins to view all feedback
-    const feedbacks = await db.feedback.findMany({
+    const feedbacks = await prisma.feedback.findMany({
       include: {
         user: {
           select: {
