@@ -7,7 +7,8 @@ export async function GET(request: NextRequest, { params }: { params: { platform
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return NextResponse.redirect('/login')
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Add fallback for dev
+      return NextResponse.redirect(`${baseUrl}/login`);
     }
 
     const { searchParams } = new URL(request.url)
@@ -15,11 +16,11 @@ export async function GET(request: NextRequest, { params }: { params: { platform
     const state = searchParams.get('state')
     
     if (!code) {
-      return NextResponse.redirect('/dashboard/social?error=missing_code')
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Add fallback for dev
+      return NextResponse.redirect(`${baseUrl}/dashboard/social?error=missing_code`);
     }
 
     // For this demo, we'll simulate the OAuth flow
-    // In a real implementation, you would exchange the code for tokens
     const { accessToken, refreshToken, expiresAt, userInfo } = await simulateOAuthExchange(params.platform, code)
     
     // Get user from database
@@ -28,7 +29,8 @@ export async function GET(request: NextRequest, { params }: { params: { platform
     })
 
     if (!user) {
-      return NextResponse.redirect('/dashboard/social?error=user_not_found')
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Add fallback for dev
+      return NextResponse.redirect(`${baseUrl}/dashboard/social?error=user_not_found`);
     }
 
     // Store the social account connection
@@ -82,7 +84,8 @@ export async function GET(request: NextRequest, { params }: { params: { platform
       }
     })
 
-    return NextResponse.redirect('/dashboard/social?success=true')
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Add fallback for dev
+    return NextResponse.redirect(`${baseUrl}/dashboard/social?success=true`);
   } catch (error) {
     console.error('OAuth callback error:', error)
     
@@ -107,12 +110,12 @@ export async function GET(request: NextRequest, { params }: { params: { platform
       }
     }
     
-    return NextResponse.redirect('/dashboard/social?error=true')
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'; // Add fallback for dev
+    return NextResponse.redirect(`${baseUrl}/dashboard/social?error=true`);
   }
 }
 
 // Simulated OAuth exchange function
-// In a real implementation, this would make actual API calls to the OAuth providers
 async function simulateOAuthExchange(platform: string, code: string): Promise<{
   accessToken: string
   refreshToken?: string

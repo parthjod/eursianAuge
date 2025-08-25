@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma, dbUtils } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/nextauth'
+import { prisma } from '@/lib/db'
 
 // Plan configurations
 const PLANS = {
@@ -19,24 +21,18 @@ const PLANS = {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get user from session cookie
-    const sessionCookie = request.cookies.get('session')
-    
-    if (!sessionCookie || !sessionCookie.value) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    let user
-    try {
-      user = JSON.parse(sessionCookie.value)
-    } catch (parseError) {
-      return NextResponse.json(
-        { error: 'Invalid session' },
-        { status: 401 }
-      )
+    // Get user from database
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     const { plan, billingCycle = 'monthly' } = await request.json()
@@ -50,13 +46,39 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already has an active subscription
-    const existingSubscription = await dbUtils.getUserSubscription(user.id)
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { userId: user.id }
+    })
     
     if (existingSubscription && existingSubscription.status === 'active') {
-      return NextResponse.json(
-        { error: 'User already has an active subscription' },
-        { status: 409 }
-      )
+      // Update existing subscription instead of creating a new one
+      const updatedSubscription = await prisma.subscription.update({
+        where: { userId: user.id },
+        data: {
+          plan,
+          price: PLANS[plan as keyof typeof PLANS].price,
+          billingCycle,
+          status: 'active',
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          lastPaymentDate: new Date(),
+          nextPaymentDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        }
+      })
+
+      // Log analytics event
+      await prisma.analytics.create({
+        data: {
+          userId: user.id,
+          eventType: 'subscription_updated',
+          eventData: JSON.stringify({ plan, billingCycle, price: PLANS[plan as keyof typeof PLANS].price })
+        }
+      })
+
+      return NextResponse.json({
+        success: true,
+        subscription: updatedSubscription
+      })
     }
 
     // Calculate dates
@@ -65,85 +87,36 @@ export async function POST(request: NextRequest) {
     endDate.setMonth(endDate.getMonth() + 1) // 1 month from now
 
     // Create subscription
-    const subscription = await dbUtils.createSubscription({
-      userId: user.id,
-      plan,
-      price: PLANS[plan as keyof typeof PLANS].price,
-      billingCycle,
+    const subscription = await prisma.subscription.create({
+      data: {
+        userId: user.id,
+        plan,
+        price: PLANS[plan as keyof typeof PLANS].price,
+        billingCycle,
+        status: 'active',
+        startDate,
+        endDate,
+        lastPaymentDate: startDate,
+        nextPaymentDate: endDate
+      }
     })
 
     // Log analytics event
-    try {
-      await dbUtils.logAnalytics({
+    await prisma.analytics.create({
+      data: {
         userId: user.id,
         eventType: 'subscription_created',
-        eventData: JSON.stringify({ plan, billingCycle, price: PLANS[plan as keyof typeof PLANS].price }),
-        ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown'
-      })
-    } catch (analyticsError) {
-      console.error('Failed to log analytics:', analyticsError)
-    }
+        eventData: JSON.stringify({ plan, billingCycle, price: PLANS[plan as keyof typeof PLANS].price })
+      }
+    })
 
     return NextResponse.json({
-      message: 'Subscription created successfully',
-      subscription: {
-        ...subscription,
-        features: PLANS[plan as keyof typeof PLANS].features
-      }
+      success: true,
+      subscription
     })
 
   } catch (error) {
     console.error('Subscription creation error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function GET(request: NextRequest) {
-  try {
-    // Get user from session cookie
-    const sessionCookie = request.cookies.get('session')
-    
-    if (!sessionCookie || !sessionCookie.value) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-
-    let user
-    try {
-      user = JSON.parse(sessionCookie.value)
-    } catch (parseError) {
-      return NextResponse.json(
-        { error: 'Invalid session' },
-        { status: 401 }
-      )
-    }
-
-    // Get user's subscription
-    const subscription = await dbUtils.getUserSubscription(user.id)
-
-    if (!subscription) {
-      return NextResponse.json({
-        subscription: null,
-        plans: PLANS
-      })
-    }
-
-    return NextResponse.json({
-      subscription: {
-        ...subscription,
-        features: PLANS[subscription.plan as keyof typeof PLANS]?.features || []
-      },
-      plans: PLANS
-    })
-
-  } catch (error) {
-    console.error('Subscription retrieval error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

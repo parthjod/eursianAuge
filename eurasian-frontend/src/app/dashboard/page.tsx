@@ -30,7 +30,8 @@ import {
   CheckCircle,
   TrendingUp,
   User,
-  ChevronDown
+  ChevronDown,
+  CreditCard
 } from 'lucide-react'
 
 const menuItems = [
@@ -56,6 +57,12 @@ const menuItems = [
     title: "Analytics",
     url: "/dashboard/analytics",
     icon: BarChart3,
+    badge: null,
+  },
+  {
+    title: "Billing",
+    url: "/dashboard/billing",
+    icon: CreditCard,
     badge: null,
   },
   {
@@ -201,11 +208,37 @@ export default function DashboardPage() {
     router.push(url)
   }
 
-  const handleConnectSocial = (platform: string) => {
-    toast({
-      title: "Connect Account",
-      description: `${platform} OAuth integration coming soon!`,
-    })
+  const handleConnectSocial = async (platform: string) => {
+    try {
+      // Initiate OAuth flow
+      const response = await fetch('/api/oauth/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ platform }),
+        credentials: 'include'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // For demo purposes, redirect to the callback URL
+        // In production, you would redirect to the actual OAuth URL
+        window.location.href = data.demoCallbackUrl
+      } else {
+        toast({
+          title: "Connection failed",
+          description: `Failed to initiate ${platform} OAuth flow.`,
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: `Failed to connect to ${platform}. Please try again.`,
+        variant: "destructive",
+      })
+    }
   }
 
   return (
