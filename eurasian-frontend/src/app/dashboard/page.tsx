@@ -34,6 +34,13 @@ import {
   CreditCard
 } from 'lucide-react'
 
+// Define the type for a connected social account
+interface ConnectedAccount {
+  platform: string;
+  username: string;
+  avatar?: string;
+}
+
 const menuItems = [
   {
     title: "Dashboard",
@@ -83,7 +90,7 @@ export default function DashboardPage() {
   const [metrics, setMetrics] = useState({
     threatsBlocked: 1204,
     accountsProtected: 3,
-    securityScore: null, // Will show error
+    securityScore: null,
     activeAlerts: 2
   })
   
@@ -135,11 +142,8 @@ export default function DashboardPage() {
     }
   ])
   
-  const [connectedAccounts, setConnectedAccounts] = useState([
-    { platform: "Instagram", username: "@user123", connected: true },
-    { platform: "Twitter", username: "@user123", connected: true },
-    { platform: "Facebook", username: "User Name", connected: false },
-  ])
+  // Use the new type for connectedAccounts state
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
 
   // Fetch dashboard data
   useEffect(() => {
@@ -222,9 +226,8 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json()
-        // For demo purposes, redirect to the callback URL
-        // In production, you would redirect to the actual OAuth URL
-        window.location.href = data.demoCallbackUrl
+        // Redirect to the authorization URL provided by the backend
+        window.location.href = data.authorization_url
       } else {
         toast({
           title: "Connection failed",
@@ -431,28 +434,32 @@ export default function DashboardPage() {
                       <CardContent>
                         <div className="space-y-4">
                           <p className="text-sm text-slate-600 mb-4">Connect your social media accounts to protect them from security threats.</p>
-                          {connectedAccounts.map((account, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                {account.platform === 'Instagram' && <Instagram className="h-5 w-5 text-pink-600" />}
-                                {account.platform === 'Twitter' && <Twitter className="h-5 w-5 text-blue-400" />}
-                                {account.platform === 'Facebook' && <Facebook className="h-5 w-5 text-blue-600" />}
-                                <div>
-                                  <p className="font-medium text-slate-900">{account.platform}</p>
-                                  <p className="text-sm text-slate-600">
-                                    {account.connected ? account.username : 'Not connected'}
-                                  </p>
+                          {['Instagram', 'Twitter', 'Facebook'].map((platform) => {
+                            const account = connectedAccounts.find(a => a.platform.toLowerCase() === platform.toLowerCase());
+                            const isConnected = !!account;
+                            return (
+                              <div key={platform} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                                <div className="flex items-center space-x-3">
+                                  {platform === 'Instagram' && <Instagram className="h-5 w-5 text-pink-600" />}
+                                  {platform === 'Twitter' && <Twitter className="h-5 w-5 text-blue-400" />}
+                                  {platform === 'Facebook' && <Facebook className="h-5 w-5 text-blue-600" />}
+                                  <div>
+                                    <p className="font-medium text-slate-900">{platform}</p>
+                                    <p className="text-sm text-slate-600">
+                                      {isConnected ? account.username : 'Not connected'}
+                                    </p>
+                                  </div>
                                 </div>
+                                <Button
+                                  variant={isConnected ? "outline" : "default"}
+                                  size="sm"
+                                  onClick={() => handleConnectSocial(platform.toLowerCase())}
+                                >
+                                  {isConnected ? 'Manage' : 'Connect'}
+                                </Button>
                               </div>
-                              <Button
-                                variant={account.connected ? "outline" : "default"}
-                                size="sm"
-                                onClick={() => handleConnectSocial(account.platform)}
-                              >
-                                {account.connected ? 'Manage' : 'Connect'}
-                              </Button>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       </CardContent>
                     </Card>

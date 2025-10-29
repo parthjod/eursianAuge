@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { Chrome, Twitter, Facebook, Instagram } from 'lucide-react'
+import { Chrome } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useUser } from '@/contexts/UserContext'
 
@@ -18,9 +18,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-  const [isTwitterLoading, setIsTwitterLoading] = useState(false)
-  const [isFacebookLoading, setIsFacebookLoading] = useState(false)
-  const [isInstagramLoading, setIsInstagramLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useUser()
@@ -76,56 +73,6 @@ export default function LoginPage() {
     }
   }
 
-  const handleTwitterLogin = async () => {
-    setIsTwitterLoading(true)
-    try {
-      await signIn('twitter', { 
-        callbackUrl: '/dashboard',
-        redirect: true 
-      })
-    } catch (error) {
-      toast({
-        title: "Twitter login failed",
-        description: "Please try again or use email login.",
-        variant: "destructive",
-      })
-      setIsTwitterLoading(false)
-    }
-  }
-
-  const handleFacebookLogin = async () => {
-    setIsFacebookLoading(true)
-    try {
-      await signIn('facebook', { 
-        callbackUrl: '/dashboard',
-        redirect: true 
-      })
-    } catch (error) {
-      toast({
-        title: "Facebook login failed",
-        description: "Please try again or use email login.",
-        variant: "destructive",
-      })
-      setIsFacebookLoading(false)
-    }
-  }
-
-  const handleInstagramLogin = async () => {
-    setIsInstagramLoading(true)
-    try {
-      await signIn('instagram', { 
-        callbackUrl: '/dashboard',
-        redirect: true 
-      })
-    } catch (error) {
-      toast({
-        title: "Instagram login failed",
-        description: "Please try again or use email login.",
-        variant: "destructive",
-      })
-      setIsInstagramLoading(false)
-    }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/20 px-4">
@@ -156,35 +103,6 @@ export default function LoginPage() {
               {isGoogleLoading ? "Connecting..." : "Continue with Google"}
             </Button>
             
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleTwitterLogin}
-              disabled={isLoading || isTwitterLoading}
-            >
-              <Twitter className="mr-2 h-4 w-4" />
-              {isTwitterLoading ? "Connecting..." : "Continue with Twitter"}
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleFacebookLogin}
-              disabled={isLoading || isFacebookLoading}
-            >
-              <Facebook className="mr-2 h-4 w-4" />
-              {isFacebookLoading ? "Connecting..." : "Continue with Facebook"}
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleInstagramLogin}
-              disabled={isLoading || isInstagramLoading}
-            >
-              <Instagram className="mr-2 h-4 w-4" />
-              {isInstagramLoading ? "Connecting..." : "Continue with Instagram"}
-            </Button>
           </div>
 
           <div className="relative">

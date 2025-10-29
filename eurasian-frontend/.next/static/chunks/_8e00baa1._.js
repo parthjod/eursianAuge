@@ -296,9 +296,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/plus.js [app-client] (ecmascript) <export default as Plus>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/refresh-cw.js [app-client] (ecmascript) <export default as RefreshCw>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$down$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronDown$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-down.js [app-client] (ecmascript) <export default as ChevronDown>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next-auth/react/index.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
+;
 ;
 ;
 ;
@@ -431,28 +433,34 @@ function SocialPage() {
     };
     const handleConnectAccount = async (platform)=>{
         try {
-            // For demo purposes, we'll simulate OAuth flow
-            // In real implementation, this would redirect to the OAuth provider
-            toast({
-                title: "Connecting to " + platform,
-                description: "Redirecting to OAuth login..."
-            });
-            // Simulate OAuth connection
-            setTimeout(()=>{
-                setAccounts((prev)=>prev.map((account)=>account.platform === platform ? {
-                            ...account,
-                            connected: true,
-                            isActive: true,
-                            followers: Math.floor(Math.random() * 2000),
-                            following: Math.floor(Math.random() * 500),
-                            posts: Math.floor(Math.random() * 100),
-                            lastScanned: new Date().toISOString()
-                        } : account));
-                toast({
-                    title: "Success!",
-                    description: `${platform} account connected successfully.`
+            if (platform.toLowerCase() === 'twitter') {
+                await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2d$auth$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["signIn"])('twitter', {
+                    callbackUrl: '/dashboard/social'
                 });
-            }, 2000);
+            } else {
+                // For demo purposes, we'll simulate OAuth flow
+                // In real implementation, this would redirect to the OAuth provider
+                toast({
+                    title: "Connecting to " + platform,
+                    description: "Redirecting to OAuth login..."
+                });
+                // Simulate OAuth connection
+                setTimeout(()=>{
+                    setAccounts((prev)=>prev.map((account)=>account.platform === platform ? {
+                                ...account,
+                                connected: true,
+                                isActive: true,
+                                followers: Math.floor(Math.random() * 2000),
+                                following: Math.floor(Math.random() * 500),
+                                posts: Math.floor(Math.random() * 100),
+                                lastScanned: new Date().toISOString()
+                            } : account));
+                    toast({
+                        title: "Success!",
+                        description: `${platform} account connected successfully.`
+                    });
+                }, 2000);
+            }
         } catch (error) {
             toast({
                 title: "Error",
@@ -519,7 +527,7 @@ function SocialPage() {
                     className: "h-5 w-5 text-pink-600"
                 }, void 0, false, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 247,
+                    lineNumber: 252,
                     columnNumber: 16
                 }, this);
             case 'twitter':
@@ -527,7 +535,7 @@ function SocialPage() {
                     className: "h-5 w-5 text-blue-400"
                 }, void 0, false, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 249,
+                    lineNumber: 254,
                     columnNumber: 16
                 }, this);
             case 'facebook':
@@ -535,7 +543,7 @@ function SocialPage() {
                     className: "h-5 w-5 text-blue-600"
                 }, void 0, false, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 251,
+                    lineNumber: 256,
                     columnNumber: 16
                 }, this);
             default:
@@ -543,7 +551,7 @@ function SocialPage() {
                     className: "h-5 w-5 text-gray-600"
                 }, void 0, false, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 253,
+                    lineNumber: 258,
                     columnNumber: 16
                 }, this);
         }
@@ -562,12 +570,12 @@ function SocialPage() {
                                 children: "Eurasian"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                lineNumber: 263,
+                                lineNumber: 268,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                            lineNumber: 262,
+                            lineNumber: 267,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -583,7 +591,7 @@ function SocialPage() {
                                                     className: "h-5 w-5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 278,
+                                                    lineNumber: 283,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -591,13 +599,13 @@ function SocialPage() {
                                                     children: item.title
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 279,
+                                                    lineNumber: 284,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                            lineNumber: 277,
+                                            lineNumber: 282,
                                             columnNumber: 17
                                         }, this),
                                         item.badge && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -605,18 +613,18 @@ function SocialPage() {
                                             children: item.badge
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                            lineNumber: 282,
+                                            lineNumber: 287,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, item.title, true, {
                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                    lineNumber: 268,
+                                    lineNumber: 273,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                            lineNumber: 266,
+                            lineNumber: 271,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -632,20 +640,20 @@ function SocialPage() {
                                                 alt: user?.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 293,
+                                                lineNumber: 298,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                 children: user?.name?.charAt(0)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 294,
+                                                lineNumber: 299,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 292,
+                                        lineNumber: 297,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -656,7 +664,7 @@ function SocialPage() {
                                                 children: user?.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 297,
+                                                lineNumber: 302,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -664,13 +672,13 @@ function SocialPage() {
                                                 children: user?.email
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 298,
+                                                lineNumber: 303,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 296,
+                                        lineNumber: 301,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenu"], {
@@ -685,17 +693,17 @@ function SocialPage() {
                                                         className: "h-4 w-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 303,
+                                                        lineNumber: 308,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 302,
+                                                    lineNumber: 307,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 301,
+                                                lineNumber: 306,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dropdown$2d$menu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DropdownMenuContent"], {
@@ -709,42 +717,42 @@ function SocialPage() {
                                                             className: "mr-2 h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                            lineNumber: 308,
+                                                            lineNumber: 313,
                                                             columnNumber: 21
                                                         }, this),
                                                         "Log out"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 307,
+                                                    lineNumber: 312,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 306,
+                                                lineNumber: 311,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 300,
+                                        lineNumber: 305,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                lineNumber: 291,
+                                lineNumber: 296,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                            lineNumber: 290,
+                            lineNumber: 295,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 261,
+                    lineNumber: 266,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -762,7 +770,7 @@ function SocialPage() {
                                                 children: "Social Accounts"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 323,
+                                                lineNumber: 328,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -770,13 +778,13 @@ function SocialPage() {
                                                 children: "Manage and monitor your social media accounts"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 324,
+                                                lineNumber: 329,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 322,
+                                        lineNumber: 327,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -786,25 +794,25 @@ function SocialPage() {
                                                 className: "mr-2 h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 327,
+                                                lineNumber: 332,
                                                 columnNumber: 17
                                             }, this),
                                             "Connect Account"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 326,
+                                        lineNumber: 331,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                lineNumber: 321,
+                                lineNumber: 326,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                            lineNumber: 320,
+                            lineNumber: 325,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -820,7 +828,7 @@ function SocialPage() {
                                                 className: "animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 339,
+                                                lineNumber: 344,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -828,18 +836,18 @@ function SocialPage() {
                                                 children: "Loading accounts..."
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 340,
+                                                lineNumber: 345,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 338,
+                                        lineNumber: 343,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                    lineNumber: 337,
+                                    lineNumber: 342,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                     className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
@@ -860,13 +868,13 @@ function SocialPage() {
                                                                             children: account.platform
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                            lineNumber: 352,
+                                                                            lineNumber: 357,
                                                                             columnNumber: 31
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                    lineNumber: 350,
+                                                                    lineNumber: 355,
                                                                     columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -874,13 +882,13 @@ function SocialPage() {
                                                                     children: account.isActive ? 'Active' : 'Inactive'
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                    lineNumber: 354,
+                                                                    lineNumber: 359,
                                                                     columnNumber: 29
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                            lineNumber: 349,
+                                                            lineNumber: 354,
                                                             columnNumber: 27
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -891,13 +899,13 @@ function SocialPage() {
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                            lineNumber: 358,
+                                                            lineNumber: 363,
                                                             columnNumber: 27
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 348,
+                                                    lineNumber: 353,
                                                     columnNumber: 25
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -914,7 +922,7 @@ function SocialPage() {
                                                                                 children: "Followers:"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 364,
+                                                                                lineNumber: 369,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -922,13 +930,13 @@ function SocialPage() {
                                                                                 children: account.followers || 0
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 365,
+                                                                                lineNumber: 370,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 363,
+                                                                        lineNumber: 368,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -938,7 +946,7 @@ function SocialPage() {
                                                                                 children: "Following:"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 368,
+                                                                                lineNumber: 373,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -946,13 +954,13 @@ function SocialPage() {
                                                                                 children: account.following || 0
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 369,
+                                                                                lineNumber: 374,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 367,
+                                                                        lineNumber: 372,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -962,7 +970,7 @@ function SocialPage() {
                                                                                 children: "Posts:"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 372,
+                                                                                lineNumber: 377,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -970,13 +978,13 @@ function SocialPage() {
                                                                                 children: account.posts || 0
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 373,
+                                                                                lineNumber: 378,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 371,
+                                                                        lineNumber: 376,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -986,7 +994,7 @@ function SocialPage() {
                                                                                 children: "Last Scan:"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 376,
+                                                                                lineNumber: 381,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -994,19 +1002,19 @@ function SocialPage() {
                                                                                 children: account.lastScanned ? new Date(account.lastScanned).toLocaleDateString() : 'Never'
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 377,
+                                                                                lineNumber: 382,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 375,
+                                                                        lineNumber: 380,
                                                                         columnNumber: 31
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                lineNumber: 362,
+                                                                lineNumber: 367,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1022,14 +1030,14 @@ function SocialPage() {
                                                                                 className: "mr-2 h-4 w-4"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                                lineNumber: 389,
+                                                                                lineNumber: 394,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             "Scan"
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 383,
+                                                                        lineNumber: 388,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     account.connected ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -1039,7 +1047,7 @@ function SocialPage() {
                                                                         children: "Disconnect"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 393,
+                                                                        lineNumber: 398,
                                                                         columnNumber: 33
                                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                                         variant: "default",
@@ -1048,30 +1056,30 @@ function SocialPage() {
                                                                         children: "Connect"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                        lineNumber: 401,
+                                                                        lineNumber: 406,
                                                                         columnNumber: 33
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                lineNumber: 382,
+                                                                lineNumber: 387,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 361,
+                                                        lineNumber: 366,
                                                         columnNumber: 27
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                    lineNumber: 360,
+                                                    lineNumber: 365,
                                                     columnNumber: 25
                                                 }, this)
                                             ]
                                         }, account.id, true, {
                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                            lineNumber: 347,
+                                            lineNumber: 352,
                                             columnNumber: 23
                                         }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
                                         className: "col-span-full border-slate-200",
@@ -1084,7 +1092,7 @@ function SocialPage() {
                                                         className: "h-12 w-12 text-gray-600 mx-auto mb-4"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 418,
+                                                        lineNumber: 423,
                                                         columnNumber: 27
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1092,7 +1100,7 @@ function SocialPage() {
                                                         children: "No Connected Accounts"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 419,
+                                                        lineNumber: 424,
                                                         columnNumber: 27
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1100,72 +1108,72 @@ function SocialPage() {
                                                         children: "Connect your social media accounts to start monitoring them for security threats."
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 420,
+                                                        lineNumber: 425,
                                                         columnNumber: 27
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                                        onClick: ()=>handleConnectAccount('Instagram'),
+                                                        onClick: ()=>handleConnectAccount('Twitter'),
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
                                                                 className: "mr-2 h-4 w-4"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                                lineNumber: 422,
+                                                                lineNumber: 427,
                                                                 columnNumber: 29
                                                             }, this),
                                                             "Connect First Account"
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                        lineNumber: 421,
+                                                        lineNumber: 426,
                                                         columnNumber: 27
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                                lineNumber: 417,
+                                                lineNumber: 422,
                                                 columnNumber: 25
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                            lineNumber: 416,
+                                            lineNumber: 421,
                                             columnNumber: 23
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                        lineNumber: 415,
+                                        lineNumber: 420,
                                         columnNumber: 21
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                    lineNumber: 344,
+                                    lineNumber: 349,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/dashboard/social/page.tsx",
-                                lineNumber: 335,
+                                lineNumber: 340,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/dashboard/social/page.tsx",
-                            lineNumber: 334,
+                            lineNumber: 339,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/dashboard/social/page.tsx",
-                    lineNumber: 318,
+                    lineNumber: 323,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/dashboard/social/page.tsx",
-            lineNumber: 259,
+            lineNumber: 264,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/src/app/dashboard/social/page.tsx",
-        lineNumber: 258,
+        lineNumber: 263,
         columnNumber: 5
     }, this);
 }

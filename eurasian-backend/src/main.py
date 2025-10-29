@@ -11,9 +11,27 @@ from src.routes.auth import auth_bp
 from src.routes.feedback import feedback_bp
 from src.routes.dashboard import dashboard_bp
 from src.routes.ai_agent import ai_agent_bp
+from src.routes.oauth import oauth_bp
+from src.celery_config import make_celery
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'eurasian-cybersecurity-secret-key-2024'
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+app.config['FRONTEND_URL'] = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+app.config.update(
+    CELERYBEAT_SCHEDULE = {
+        'monitor-every-5-minutes': {
+            'task': 'src.tasks.monitor_all_accounts',
+            'schedule': 300.0
+        },
+        'send-weekly-reports': {
+            'task': 'src.tasks.send_weekly_reports',
+            'schedule': 604800.0
+        }
+    }
+)
+
 
 # Enable CORS for all routes
 CORS(app, origins="*", allow_headers=["Content-Type", "Authorization"])
@@ -24,11 +42,14 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(feedback_bp, url_prefix='/api')
 app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
 app.register_blueprint(ai_agent_bp, url_prefix='/api/ai')
+app.register_blueprint(oauth_bp, url_prefix='/api/oauth')
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+
+celery = make_celery(app)
 
 with app.app_context():
     db.create_all()

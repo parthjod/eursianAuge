@@ -12,12 +12,7 @@ class User(db.Model):
     login_method = db.Column(db.String(20), nullable=False, default='email')  # 'email' or 'google'
     google_id = db.Column(db.String(100), unique=True, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    subscription_tier = db.Column(db.String(20), nullable=True)  # 'first', 'second', 'third'
-    
-    # Social media connections
-    instagram_connected = db.Column(db.Boolean, default=False)
-    twitter_connected = db.Column(db.Boolean, default=False)
-    facebook_connected = db.Column(db.Boolean, default=False)
+    subscription_tier = db.Column(db.String(20), nullable=True, default='free')  # 'free', 'first', 'second', 'third'
     
     def set_password(self, password):
         """Hash and set password"""
@@ -40,9 +35,34 @@ class User(db.Model):
             'login_method': self.login_method,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'subscription_tier': self.subscription_tier,
-            'instagram_connected': self.instagram_connected,
-            'twitter_connected': self.twitter_connected,
-            'facebook_connected': self.facebook_connected
+            'social_accounts': [account.to_dict() for account in self.social_accounts]
+        }
+
+class SocialAccount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
+    platform = db.Column(db.String(30), nullable=False)  # e.g., 'instagram', 'twitter', 'facebook'
+    username = db.Column(db.String(150), nullable=True)
+    profile_picture = db.Column(db.String(255), nullable=True)
+    access_token = db.Column(db.String(1024), nullable=False)
+    refresh_token = db.Column(db.String(1024), nullable=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('social_accounts', lazy=True, cascade="all, delete-orphan"))
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'platform', name='_user_platform_uc'),)
+
+    def __repr__(self):
+        return f'<SocialAccount {self.platform} for User {self.user_id}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'platform': self.platform,
+            'username': self.username,
+            'profile_picture': self.profile_picture,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
 class Feedback(db.Model):
@@ -80,7 +100,7 @@ class ThreatLog(db.Model):
     detected_at = db.Column(db.DateTime, default=datetime.utcnow)
     blocked = db.Column(db.Boolean, default=True)
     
-    user = db.relationship('User', backref=db.backref('threats', lazy=True))
+    user = db.relationship('User', backref=db.backref('threats', lazy=True, cascade="all, delete-orphan"))
     
     def __repr__(self):
         return f'<ThreatLog {self.threat_type} on {self.platform}>'

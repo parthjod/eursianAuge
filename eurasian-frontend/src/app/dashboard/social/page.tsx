@@ -30,6 +30,7 @@ import {
   RefreshCw,
   ChevronDown
 } from 'lucide-react'
+import { signIn } from 'next-auth/react'
 
 const menuItems = [
   {
@@ -150,33 +151,37 @@ export default function SocialPage() {
 
   const handleConnectAccount = async (platform: string) => {
     try {
-      // For demo purposes, we'll simulate OAuth flow
-      // In real implementation, this would redirect to the OAuth provider
-      toast({
-        title: "Connecting to " + platform,
-        description: "Redirecting to OAuth login...",
-      })
-      
-      // Simulate OAuth connection
-      setTimeout(() => {
-        setAccounts(prev => prev.map(account => 
-          account.platform === platform 
-            ? { 
-                ...account, 
-                connected: true, 
-                isActive: true,
-                followers: Math.floor(Math.random() * 2000),
-                following: Math.floor(Math.random() * 500),
-                posts: Math.floor(Math.random() * 100),
-                lastScanned: new Date().toISOString()
-              }
-            : account
-        ))
+      if (platform.toLowerCase() === 'twitter') {
+        await signIn('twitter', { callbackUrl: '/dashboard/social' })
+      } else {
+        // For demo purposes, we'll simulate OAuth flow
+        // In real implementation, this would redirect to the OAuth provider
         toast({
-          title: "Success!",
-          description: `${platform} account connected successfully.`,
+          title: "Connecting to " + platform,
+          description: "Redirecting to OAuth login...",
         })
-      }, 2000)
+        
+        // Simulate OAuth connection
+        setTimeout(() => {
+          setAccounts(prev => prev.map(account => 
+            account.platform === platform 
+              ? { 
+                  ...account, 
+                  connected: true, 
+                  isActive: true,
+                  followers: Math.floor(Math.random() * 2000),
+                  following: Math.floor(Math.random() * 500),
+                  posts: Math.floor(Math.random() * 100),
+                  lastScanned: new Date().toISOString()
+                }
+              : account
+          ))
+          toast({
+            title: "Success!",
+            description: `${platform} account connected successfully.`,
+          })
+        }, 2000)
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -418,7 +423,7 @@ export default function SocialPage() {
                           <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                           <h3 className="text-lg font-semibold text-slate-900 mb-2">No Connected Accounts</h3>
                           <p className="text-slate-600 mb-4">Connect your social media accounts to start monitoring them for security threats.</p>
-                          <Button onClick={() => handleConnectAccount('Instagram')}>
+                          <Button onClick={() => handleConnectAccount('Twitter')}>
                             <Plus className="mr-2 h-4 w-4" />
                             Connect First Account
                           </Button>
