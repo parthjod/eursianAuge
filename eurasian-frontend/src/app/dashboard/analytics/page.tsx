@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@/contexts/UserContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Button } from '@/components/ui/button'
@@ -25,8 +25,21 @@ import {
   CreditCard,
   LogOut,
   TrendingUp,
-  ChevronDown
+  ChevronDown,
+  AlertTriangle
 } from 'lucide-react'
+
+// Define the types for the data
+interface MonitoredAccount {
+  id: number;
+  username: string;
+  security_status: string; // This is a JSON string
+}
+
+interface SecurityReport {
+  summary: string;
+  risks: { risk: string; details: string }[];
+}
 
 const menuItems = [
   {
@@ -67,10 +80,12 @@ const menuItems = [
   },
 ]
 
-export default function AnalyticsPage() {
+function AnalyticsView() {
   const { user, logout } = useUser()
   const router = useRouter()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const accountId = searchParams.get('accountId')
   const [loading, setLoading] = useState(true)
   const [analytics, setAnalytics] = useState({
     totalThreats: 0,
@@ -81,19 +96,46 @@ export default function AnalyticsPage() {
     threatsByPlatform: {},
     monthlyTrends: []
   })
+  const [monitoredAccount, setMonitoredAccount] = useState<MonitoredAccount | null>(null)
+  const [securityReport, setSecurityReport] = useState<SecurityReport | null>(null)
 
   // Fetch analytics data
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/analytics', {
+        const url = accountId ? `/api/analytics?accountId=${accountId}` : '/api/analytics';
+        const response = await fetch(url, {
           credentials: 'include'
         })
         if (response.ok) {
           const data = await response.json()
           setAnalytics(data.analytics || analytics)
         }
+
+        if (accountId) {
+          const accountResponse = await fetch(`/api/ai-agent/monitored-accounts/${accountId}`, {
+            credentials: 'include'
+          });
+          if (accountResponse.ok) {
+            const accountData = await accountResponse.json();
+            setMonitoredAccount(accountData);
+            if (accountData.security_status) {
+              try {
+                const report = JSON.parse(accountData.security_status);
+                setSecurityReport(report);
+              } catch (e) {
+                console.error("Error parsing security status:", e);
+                toast({
+                  title: "Error",
+                  description: "Could not parse the security report.",
+                  variant: "destructive"
+                });
+              }
+            }
+          }
+        }
+
       } catch (error) {
         console.error('Error fetching analytics:', error)
         toast({
@@ -109,7 +151,7 @@ export default function AnalyticsPage() {
     if (user) {
       fetchAnalytics()
     }
-  }, [user, toast])
+  }, [user, accountId, toast])
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -192,7 +234,9 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>
-                <p className="text-slate-600">Security analytics and insights</p>
+                <p className="text-slate-600">
+                  {monitoredAccount ? `Security Report for ${monitoredAccount.username}` : 'Overall Security Analytics'}
+                </p>
               </div>
             </div>
           </header>
@@ -209,6 +253,37 @@ export default function AnalyticsPage() {
                 </div>
               ) : (
                 <>
+                  {/* Security Report for a specific account */}
+                  {accountId && securityReport && (
+                    <Card className="mb-8 bg-white border-slate-200">
+                      <CardHeader>
+                        <CardTitle className="text-slate-900">Instagram Bio Security Report</CardTitle>
+                        <CardDescription className="text-slate-600">Analysis of the account bio for potential risks.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <h3 className="font-semibold text-lg text-slate-800 mb-2">Summary</h3>
+                        <p className="text-slate-700 mb-6">{securityReport.summary}</p>
+                        
+                        <h3 className="font-semibold text-lg text-slate-800 mb-4">Detected Risks</h3>
+                        {securityReport.risks && securityReport.risks.length > 0 ? (
+                          <ul className="space-y-4">
+                            {securityReport.risks.map((risk, index) => (
+                              <li key={index} className="flex items-start p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <AlertTriangle className="h-5 w-5 text-red-500 mr-4 mt-1 flex-shrink-0" />
+                                <div>
+                                  <h4 className="font-semibold text-red-800">{risk.risk}</h4>
+                                  <p className="text-red-700">{risk.details}</p>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-slate-600">No specific risks were detected in the bio.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {/* Summary Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <Card className="border-slate-200">
@@ -315,5 +390,13 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </ProtectedRoute>
+  )
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AnalyticsView />
+    </Suspense>
   )
 }

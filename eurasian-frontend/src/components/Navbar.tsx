@@ -35,8 +35,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <img src="/logo.svg" alt="Eurasian" className="h-8 w-auto" />
+            <Link href="/" className="flex items-center">   
               <span className="ml-2 text-xl font-bold text-foreground">Eurasian</span>
             </Link>
           </div>

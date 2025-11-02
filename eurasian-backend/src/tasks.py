@@ -1,17 +1,24 @@
 import os
 from .main import celery, db
 from .models.user import User, SocialAccount, ThreatLog
+from .models.monitored_account import MonitoredAccount
 import openai
 from datetime import datetime
 import random
 import re
 from googleapiclient.discovery import build
 import uuid # <-- Add this line
+import requests
+from bs4 import BeautifulSoup
+import google.generativeai as genai
 
 # --- Placeholders for API Keys ---
 # In a real application, these should be loaded securely, e.g., from environment variables.
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+genai.configure(api_key=GEMINI_API_KEY)
 
 # --- Simulated Social Media Data ---
 def get_simulated_activity(platform):
@@ -35,6 +42,50 @@ def monitor_all_accounts():
     for user in users:
         for account in user.social_accounts:
             monitor_account.delay(account.id)
+        for account in user.monitored_accounts:
+            monitor_public_instagram_account.delay(account.id)
+
+@celery.task
+def monitor_public_instagram_account(account_id):
+    """
+    Monitors a single public Instagram account for security risks.
+    """
+    account = MonitoredAccount.query.get(account_id)
+    if not account:
+        return
+
+    try:
+        url = f"https://www.instagram.com/{account.username}/"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+        response = requests.get(url, headers=headers)
+        response.raise_for_status() # Raise an exception for bad status codes
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Extract bio and recent posts (this is a simplified example, scraping Instagram is complex)
+        bio = soup.find('meta', {'property': 'og:description'})
+        bio_content = bio['content'] if bio else ""
+
+        # For demonstration, we'll just use the bio. A real implementation would need to be more robust.
+        # and likely use a dedicated Instagram scraping library or a different approach.
+        
+        if GEMINI_API_KEY:
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            prompt = f"""Analyze the following Instagram bio for any potential security risks, such as suspicious links, personal information exposure, or signs of a compromised account. Provide a JSON response with a 'summary' and a list of 'risks'.
+
+Bio: {bio_content}"""
+            
+            gemini_response = model.generate_content(prompt)
+            
+            # Assuming the response is a JSON string
+            security_analysis = gemini_response.text
+            
+            account.security_status = security_analysis
+            account.last_checked = datetime.utcnow()
+            db.session.commit()
+
+    except Exception as e:
+        print(f"Error monitoring public Instagram account {account.username}: {e}")
 
 @celery.task
 def monitor_account(account_id):
@@ -160,3 +211,11 @@ def send_user_weekly_report(user_id):
     # generate a summary, and email it to the user.
     print(f"--- Sending weekly report to {user.email} ---")
     print("This is a placeholder for the weekly report.")
+
+@celery.task
+def list_models():
+    """Lists available models."""
+    with open("models.txt", "w") as f:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                f.write(m.name + "\n")

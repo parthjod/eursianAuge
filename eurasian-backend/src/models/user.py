@@ -35,7 +35,6 @@ class User(db.Model):
             'login_method': self.login_method,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'subscription_tier': self.subscription_tier,
-            'social_accounts': [account.to_dict() for account in self.social_accounts]
         }
 
 class SocialAccount(db.Model):

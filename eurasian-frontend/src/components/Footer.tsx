@@ -34,7 +34,6 @@ export default function Footer() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
-              <img src="/logo.svg" alt="Eurasian" className="h-8 w-auto" />
               <span className="ml-2 text-xl font-bold text-foreground">Eurasian</span>
             </div>
             <p className="text-muted-foreground mb-4">

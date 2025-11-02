@@ -33,12 +33,23 @@ import {
   ChevronDown,
   CreditCard
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 // Define the type for a connected social account
 interface ConnectedAccount {
   platform: string;
   username: string;
   avatar?: string;
+}
+
+interface MonitoredAccount {
+  id: number;
+  platform: string;
+  username: string;
+  security_status: any;
+  last_checked: string;
 }
 
 const menuItems = [
@@ -85,6 +96,8 @@ export default function DashboardPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
+  const [isInstagramDialogOpen, setIsInstagramDialogOpen] = useState(false)
+  const [instagramUsername, setInstagramUsername] = useState('')
   
   // Real data state
   const [metrics, setMetrics] = useState({
@@ -144,6 +157,7 @@ export default function DashboardPage() {
   
   // Use the new type for connectedAccounts state
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
+  const [monitoredAccounts, setMonitoredAccounts] = useState<MonitoredAccount[]>([])
 
   // Fetch dashboard data
   useEffect(() => {
@@ -181,6 +195,16 @@ export default function DashboardPage() {
             setConnectedAccounts(socialData.accounts)
           }
         }
+
+        // Fetch monitored accounts
+        const monitoredResponse = await fetch(`/api/ai-agent/monitored-accounts?user_id=${user?.id}`, {
+          credentials: 'include'
+        })
+        if (monitoredResponse.ok) {
+          const monitoredData = await monitoredResponse.json()
+          setMonitoredAccounts(monitoredData)
+        }
+
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
         toast({
@@ -198,6 +222,44 @@ export default function DashboardPage() {
     }
   }, [user, toast])
 
+  useEffect(() => {
+    const pendingAccounts = monitoredAccounts.filter(acc => !acc.security_status);
+
+    if (pendingAccounts.length > 0) {
+      const interval = setInterval(async () => {
+        let updated = false;
+        const updatedAccounts = [...monitoredAccounts];
+
+        for (let i = 0; i < updatedAccounts.length; i++) {
+          const account = updatedAccounts[i];
+          if (!account.security_status) {
+            try {
+              const response = await fetch(`/api/ai-agent/monitored-accounts/${account.id}`, {
+                credentials: 'include'
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                if (data.security_status) {
+                  updatedAccounts[i] = data;
+                  updated = true;
+                }
+              }
+            } catch (error) {
+              console.error(`Error fetching status for account ${account.id}:`, error);
+            }
+          }
+        }
+
+        if (updated) {
+          setMonitoredAccounts(updatedAccounts);
+        }
+      }, 5000); // Poll every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [monitoredAccounts]);
+
   const handleLogout = () => {
     if (confirm('Are you sure you want to logout?')) {
       logout()
@@ -213,36 +275,124 @@ export default function DashboardPage() {
   }
 
   const handleConnectSocial = async (platform: string) => {
+    if (platform === 'instagram') {
+      setIsInstagramDialogOpen(true)
+    } else {
+      try {
+        // Initiate OAuth flow
+        const response = await fetch(`/api/oauth/initiate/${platform}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ platform }),
+          credentials: 'include'
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          // Redirect to the authorization URL provided by the backend
+          window.location.href = data.authorization_url
+        } else {
+          toast({
+            title: "Connection failed",
+            description: `Failed to initiate ${platform} OAuth flow.`,
+            variant: "destructive",
+          })
+        }
+      } catch (error) {
+        toast({
+          title: "Connection failed",
+          description: `Failed to connect to ${platform}. Please try again.`,
+          variant: "destructive",
+        })
+      }
+    }
+  }
+
+  const handleInstagramConnect = async () => {
+    if (!instagramUsername) {
+      toast({
+        title: "Username required",
+        description: "Please enter your Instagram username.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      // Initiate OAuth flow
-      const response = await fetch('/api/oauth/initiate', {
+      const response = await fetch('/api/ai-agent/monitored-accounts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ platform }),
+        body: JSON.stringify({ user_id: user?.id, username: instagramUsername }),
         credentials: 'include'
       })
 
       if (response.ok) {
-        const data = await response.json()
-        // Redirect to the authorization URL provided by the backend
-        window.location.href = data.authorization_url
+        const newAccount = await response.json()
+        setMonitoredAccounts([...monitoredAccounts, newAccount])
+        toast({
+          title: "Account connected",
+          description: "Your Instagram account is now being monitored.",
+        })
+        setIsInstagramDialogOpen(false)
+        setInstagramUsername('')
       } else {
+        const errorData = await response.json()
         toast({
           title: "Connection failed",
-          description: `Failed to initiate ${platform} OAuth flow.`,
+          description: errorData.error || "Failed to connect Instagram account.",
           variant: "destructive",
         })
       }
     } catch (error) {
       toast({
         title: "Connection failed",
-        description: `Failed to connect to ${platform}. Please try again.`,
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
     }
   }
+
+  const handleRemoveAccount = async (accountId: number) => {
+    if (!confirm('Are you sure you want to remove this account?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/ai-agent/monitored-accounts`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ account_id: accountId }),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        setMonitoredAccounts(monitoredAccounts.filter(acc => acc.id !== accountId));
+        toast({
+          title: "Account removed",
+          description: "The account has been successfully removed.",
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Removal failed",
+          description: errorData.error || "Failed to remove the account.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Removal failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <ProtectedRoute>
@@ -352,8 +502,8 @@ export default function DashboardPage() {
                         <User className="h-4 w-4 text-blue-600" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold text-slate-900">{metrics.accountsProtected}</div>
-                        <p className="text-xs text-slate-600">{metrics.accountsProtected} connected</p>
+                        <div className="text-2xl font-bold text-slate-900">{connectedAccounts.length + monitoredAccounts.length}</div>
+                        <p className="text-xs text-slate-600">{connectedAccounts.length + monitoredAccounts.length} connected</p>
                       </CardContent>
                     </Card>
 
@@ -460,6 +610,36 @@ export default function DashboardPage() {
                               </div>
                             )
                           })}
+                          {monitoredAccounts.map((account) => (
+                            <div key={account.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <Instagram className="h-5 w-5 text-pink-600" />
+                                <div>
+                                  <p className="font-medium text-slate-900">{account.username}</p>
+                                  <p className="text-sm text-slate-600">
+                                    {account.security_status ? 'Monitored' : 'Pending analysis'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => router.push(`/dashboard/analytics?accountId=${account.id}`)}
+                                  disabled={!account.security_status}
+                                >
+                                  View Report
+                                </Button>
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm"
+                                  onClick={() => handleRemoveAccount(account.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </CardContent>
                     </Card>
@@ -470,6 +650,33 @@ export default function DashboardPage() {
           </main>
         </div>
       </div>
+      <Dialog open={isInstagramDialogOpen} onOpenChange={setIsInstagramDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect Instagram Account</DialogTitle>
+            <DialogDescription>
+              Enter your Instagram username to start monitoring your account for security risks.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="instagram-username" className="text-right">
+                Username
+              </Label>
+              <Input
+                id="instagram-username"
+                value={instagramUsername}
+                onChange={(e) => setInstagramUsername(e.target.value)}
+                className="col-span-3"
+                placeholder="@username"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleInstagramConnect}>Connect</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ProtectedRoute>
   )
 }

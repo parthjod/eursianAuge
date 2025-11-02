@@ -1,7 +1,6 @@
 import os
-import sys
-# DON'T CHANGE THIS !!!
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from dotenv import load_dotenv
+load_dotenv()
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -16,11 +15,11 @@ from src.celery_config import make_celery
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = 'eurasian-cybersecurity-secret-key-2024'
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
-app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+app.config['broker_url'] = 'redis://localhost:6379/0'
+app.config['result_backend'] = 'redis://localhost:6379/0'
 app.config['FRONTEND_URL'] = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 app.config.update(
-    CELERYBEAT_SCHEDULE = {
+    beat_schedule = {
         'monitor-every-5-minutes': {
             'task': 'src.tasks.monitor_all_accounts',
             'schedule': 300.0
@@ -41,7 +40,7 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(feedback_bp, url_prefix='/api')
 app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
-app.register_blueprint(ai_agent_bp, url_prefix='/api/ai')
+app.register_blueprint(ai_agent_bp, url_prefix='/api/ai-agent')
 app.register_blueprint(oauth_bp, url_prefix='/api/oauth')
 
 # Database configuration
@@ -56,6 +55,7 @@ with app.app_context():
     
     # Create some sample threat data for demonstration
     from src.models.user import ThreatLog, User
+    from src.models.monitored_account import MonitoredAccount
     
     # Check if we already have sample data
     if ThreatLog.query.count() == 0:
@@ -108,6 +108,5 @@ def serve(path):
         else:
             return "index.html not found", 404
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
 

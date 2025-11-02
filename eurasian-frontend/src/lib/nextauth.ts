@@ -40,30 +40,16 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.INSTAGRAM_CLIENT_SECRET || '',
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account) {
-        token.accessToken = account.access_token
-        token.provider = account.provider
-      }
-      if (user) {
-        token.id = user.id
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.accessToken = typeof token.accessToken === 'string' ? token.accessToken : undefined
-        session.provider = token.provider as string | undefined
-        session.user.id = token.id as string
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id
       }
       return session
     },
   },
   pages: {
     signIn: '/login',
-  },
-  session: {
-    strategy: 'jwt',
   },
 }
