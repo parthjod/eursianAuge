@@ -1,41 +1,55 @@
 import google.generativeai as genai
 import os
 import json
-import dotenv
+import typing_extensions as typing
 
-# Load environment variables
-dotenv.load_dotenv()
+# Configure API
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Make sure you set this env var or paste your key here for testing
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") 
-genai.configure(api_key=GEMINI_API_KEY)
+# Use the latest flash model for speed
+model = genai.GenerativeModel('gemini-2.0-flash')
 
-def analyze_content(text, content_type="comment"):
+# Define the structured output schema
+class ThreatAnalysis(typing.TypedDict):
+    is_threat: bool
+    risk_score: int
+    type: str
+    reason: str
+
+def analyze_content(text: str, platform: str = "General") -> ThreatAnalysis:
     """
-    Analyzes text for threats using Gemini.
-    Returns a dictionary: {'is_threat': bool, 'risk_score': int, 'reason': str}
+    Analyzes text for security threats using Gemini, with platform-specific context.
     """
-    model = genai.GenerativeModel('gemini-2.5-flash')
     
+    # We give the LLM specific instructions based on the platform
     prompt = f"""
-    Act as a cybersecurity expert. Analyze this {content_type}:
-    "{text}"
+    You are a Cyber Security Agent monitoring {platform}.
+    Analyze the following text for security threats (Phishing, Scams, Malware, Harassment, Bot Spam).
     
-    Is this a security threat (phishing, scam, malware, social engineering)?
-    Reply in strict JSON format:
-    {{
-        "is_threat": boolean,
-        "risk_score": integer (0-100),
-        "reason": "short explanation"
-    }}
+    TEXT TO ANALYZE: "{text}"
+    
+    CONTEXT: This is a {platform} post/message.
+    
+    Respond with a JSON object containing:
+    - is_threat: boolean (true if dangerous/spam)
+    - risk_score: integer (0-100)
+    - type: string (e.g., "Phishing", "Crypto Scam", "Safe", "Hate Speech")
+    - reason: string (Short explanation, max 1 sentence)
     """
-    
+
     try:
-        response = model.generate_content(prompt)
-        # Clean the response to ensure it's valid JSON
-        clean_text = response.text.replace('```json', '').replace('```', '').strip()
-        return json.loads(clean_text)
+        # Generate response forcing JSON mode
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(
+                response_mime_type="application/json",
+                response_schema=ThreatAnalysis
+            )
+        )
+        
+        return json.loads(response.text)
+        
     except Exception as e:
-        print(f"❌ AI Analysis Failed: {e}")
-        # Default fallback (fail safe)
-        return {"is_threat": False, "risk_score": 0, "reason": "AI Error"}
+        print(f"LLM Error: {e}")
+        # Fail safe return
+        return {"is_threat": False, "risk_score": 0, "type": "Error", "reason": "Analysis Failed"}
